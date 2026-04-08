@@ -37,9 +37,11 @@ function App() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [isAddColumnModalOpen, setIsAddColumnModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [editingColumnId, setEditingColumnId] = useState<number | null>(null);
   const [columnTitleInput, setColumnTitleInput] = useState('');
+  const [newColumnTitle, setNewColumnTitle] = useState('');
   
   const [formData, setFormData] = useState<Partial<Task>>({
     priority: 'Média',
@@ -94,15 +96,21 @@ function App() {
     }
   };
 
-  const handleAddColumn = async () => {
-    const title = window.prompt("Nome da nova coluna:");
-    if (title) {
-      try {
-        await api.createColumn({ title });
-        fetchData();
-      } catch (err) {
-        console.error("Error adding column", err);
-      }
+  const handleAddColumn = () => {
+    setNewColumnTitle('');
+    setIsAddColumnModalOpen(true);
+  };
+
+  const handleAddColumnSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newColumnTitle.trim()) return;
+    try {
+      await api.createColumn({ title: newColumnTitle.trim() });
+      setIsAddColumnModalOpen(false);
+      setNewColumnTitle('');
+      fetchData();
+    } catch (err) {
+      console.error("Error adding column", err);
     }
   };
 
@@ -382,6 +390,34 @@ function App() {
                 <div className={`priority-dot priority-${selectedTask.priority}`} /> <b>Prioridade:</b> {selectedTask.priority}
               </div>
             </div>
+          </div>
+        </div>
+      )}
+      {/* Modal Adicionar Coluna */}
+      {isAddColumnModalOpen && (
+        <div className="modal-overlay">
+          <div className="modal-content" style={{ maxWidth: '420px' }}>
+            <div className="modal-header">
+              <h2>Nova Coluna</h2>
+              <button className="icon-btn" onClick={() => setIsAddColumnModalOpen(false)}>✕</button>
+            </div>
+            <form onSubmit={handleAddColumnSubmit}>
+              <div className="form-group">
+                <label>Nome da Coluna</label>
+                <input
+                  type="text"
+                  autoFocus
+                  placeholder="Ex: Revisão, Teste, Bloqueado..."
+                  value={newColumnTitle}
+                  onChange={e => setNewColumnTitle(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn-cancel" onClick={() => setIsAddColumnModalOpen(false)}>Cancelar</button>
+                <button type="submit" className="btn-save">Criar Coluna</button>
+              </div>
+            </form>
           </div>
         </div>
       )}
