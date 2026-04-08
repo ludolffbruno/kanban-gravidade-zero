@@ -1,0 +1,41 @@
+import { Database } from "bun:sqlite";
+import { join } from "path";
+
+const DB_PATH = join(import.meta.dir, "..", "db", "kanban.sqlite");
+
+export const db = new Database(DB_PATH);
+
+// Initialize tables
+export function initDB() {
+  db.run(`
+    CREATE TABLE IF NOT EXISTS categories (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      emoji TEXT
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS tasks (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      description TEXT,
+      priority TEXT CHECK(priority IN ('Alta', 'Média', 'Baixa')) DEFAULT 'Média',
+      category_id INTEGER,
+      status TEXT CHECK(status IN ('todo', 'in_progress', 'done')) DEFAULT 'todo',
+      due_date TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (category_id) REFERENCES categories(id)
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS comments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      task_id INTEGER NOT NULL,
+      content TEXT NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE
+    )
+  `);
+}
