@@ -41,10 +41,14 @@ async function seed() {
 
   // 3. Tarefas
   const tasks = [
-    { title: "Finalizar relatório mensal", desc: "Revisar planilhas e enviar para o financeiro.", priority: "Alta", cat: categoryIds[0], col: columnIds[0], pos: 0, date: "2026-04-15" },
-    { title: "Estudar React Query", desc: "Ver documentação oficial e fazer um projeto simples.", priority: "Média", cat: categoryIds[1], col: columnIds[1], pos: 0, date: "2026-04-10" },
-    { title: "Comprar suprimentos", desc: "Ir ao mercado comprar frutas e verduras.", priority: "Baixa", cat: categoryIds[2], col: columnIds[2], pos: 0, date: "2026-04-06" },
-    { title: "Academia", desc: "Treino de pernas e cardio.", priority: "Alta", cat: categoryIds[3], col: columnIds[0], pos: 1, date: "2026-04-09" },
+    { title: "Finalizar relatório mensal", desc: "Revisar planilhas e enviar para o financeiro.", priority: "Alta", cat: categoryIds[0], col: columnIds[0], pos: 0, date: "2026-04-14" },
+    { title: "Reunião com o cliente", desc: "Alinhar escopo do projeto e próximas entregas.", priority: "Alta", cat: categoryIds[0], col: columnIds[1], pos: 0, date: "2026-04-09" },
+    { title: "Estudar React e TypeScript", desc: "Ver documentação oficial e fazer projetos práticos.", priority: "Média", cat: categoryIds[1], col: columnIds[0], pos: 1, date: "2026-04-16" },
+    { title: "Revisar flashcards de inglês", desc: "Dedicar 20 minutos ao Anki para consolidar vocabulário.", priority: "Baixa", cat: categoryIds[1], col: columnIds[2], pos: 0, date: "2026-04-08" },
+    { title: "Ir à academia", desc: "Treino de força: pernas e core. Cardio no final.", priority: "Média", cat: categoryIds[3], col: columnIds[1], pos: 1, date: "2026-04-09" },
+    { title: "Consulta médica anual", desc: "Agendar check-up completo e exames de rotina.", priority: "Alta", cat: categoryIds[3], col: columnIds[0], pos: 2, date: "2026-04-22" },
+    { title: "Organizar finanças do mês", desc: "Categorizar gastos e planejar orçamento de maio.", priority: "Média", cat: categoryIds[4], col: columnIds[0], pos: 3, date: "2026-04-30" },
+    { title: "Ligar para a família", desc: "Marcar almoço do domingo com os pais.", priority: "Baixa", cat: categoryIds[2], col: columnIds[2], pos: 1, date: "2026-04-13" },
   ];
 
   const insertTask = db.prepare(`
