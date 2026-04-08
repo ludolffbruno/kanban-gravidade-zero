@@ -5,8 +5,8 @@ const DB_PATH = join(import.meta.dir, "..", "db", "kanban.sqlite");
 
 export const db = new Database(DB_PATH);
 
-// Initialize tables
 export function initDB() {
+  // Tabela de Categorias
   db.run(`
     CREATE TABLE IF NOT EXISTS categories (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -15,6 +15,16 @@ export function initDB() {
     )
   `);
 
+  // Nova Tabela de Colunas
+  db.run(`
+    CREATE TABLE IF NOT EXISTS columns (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      position INTEGER DEFAULT 0
+    )
+  `);
+
+  // Tabela de Tarefas Atualizada
   db.run(`
     CREATE TABLE IF NOT EXISTS tasks (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -22,17 +32,20 @@ export function initDB() {
       description TEXT,
       priority TEXT CHECK(priority IN ('Alta', 'Média', 'Baixa')) DEFAULT 'Média',
       category_id INTEGER,
-      status TEXT CHECK(status IN ('todo', 'in_progress', 'done')) DEFAULT 'todo',
+      column_id INTEGER,
       due_date TEXT,
+      position INTEGER DEFAULT 0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (category_id) REFERENCES categories(id)
+      FOREIGN KEY (category_id) REFERENCES categories(id),
+      FOREIGN KEY (column_id) REFERENCES columns(id) ON DELETE CASCADE
     )
   `);
 
+  // Tabela de Comentários
   db.run(`
     CREATE TABLE IF NOT EXISTS comments (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      task_id INTEGER NOT NULL,
+      task_id INTEGER,
       content TEXT NOT NULL,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE

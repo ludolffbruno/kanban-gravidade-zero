@@ -1,5 +1,8 @@
+/* Created by: Bruno Ludolff */
 import { useState, useEffect } from 'react'
-import { Plus, Clock, MoreVertical, Edit2, Trash2, CheckCircle, List, ArrowRight } from 'lucide-react'
+import { Plus, Clock, Edit2, Trash2, ArrowRight, List } from 'lucide-react'
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
+import type { DropResult } from '@hello-pangea/dnd'
 import * as api from './api'
 import './App.css'
 
@@ -9,10 +12,17 @@ interface Task {
   description: string;
   priority: 'Alta' | 'Média' | 'Baixa';
   category_id: number;
-  status: 'todo' | 'in_progress' | 'done';
+  column_id: number;
   due_date: string;
+  position: number;
   category_name?: string;
   category_emoji?: string;
+}
+
+interface Column {
+  id: number;
+  title: string;
+  position: number;
 }
 
 interface Category {
@@ -23,13 +33,16 @@ interface Category {
 
 function App() {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [columns, setColumns] = useState<Column[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [editingColumnId, setEditingColumnId] = useState<number | null>(null);
+  const [columnTitleInput, setColumnTitleInput] = useState('');
+  
   const [formData, setFormData] = useState<Partial<Task>>({
     priority: 'Média',
-    status: 'todo'
   });
 
   useEffect(() => {
@@ -38,12 +51,14 @@ function App() {
 
   const fetchData = async () => {
     try {
-      const [tasksRes, catsRes] = await Promise.all([
+      const [tasksRes, catsRes, colsRes] = await Promise.all([
         api.getTasks(),
-        api.getCategories()
+        api.getCategories(),
+        api.getColumns()
       ]);
       setTasks(tasksRes.data);
       setCategories(catsRes.data);
+      setColumns(colsRes.data);
     } catch (err) {
       console.error("Error fetching data", err);
     }
@@ -55,10 +70,12 @@ function App() {
       if (formData.id) {
         await api.updateTask(formData.id, formData);
       } else {
-        await api.createTask(formData);
+        // Se não houver coluna definida, usa a primeira
+        const defaultCol = formData.column_id || (columns.length > 0 ? columns[0].id : undefined);
+        await api.createTask({ ...formData, column_id: defaultCol });
       }
       setIsModalOpen(false);
-      setFormData({ priority: 'Média', status: 'todo' });
+      setFormData({ priority: 'Média' });
       fetchData();
     } catch (err) {
       console.error("Error saving task", err);
@@ -66,7 +83,7 @@ function App() {
   };
 
   const handleDelete = async (id: number) => {
-    if (confirm("Tem certeza que deseja excluir esta tarefa?")) {
+    if (window.confirm("Tem certeza que deseja excluir esta tarefa?")) {
       try {
         await api.deleteTask(id);
         setIsDetailOpen(false);
@@ -77,12 +94,72 @@ function App() {
     }
   };
 
-  const updateStatus = async (id: number, status: string) => {
+  const handleAddColumn = async () => {
+    const title = window.prompt("Nome da nova coluna:");
+    if (title) {
+      try {
+        await api.createColumn({ title });
+        fetchData();
+      } catch (err) {
+        console.error("Error adding column", err);
+      }
+    }
+  };
+
+  const handleRenameColumn = async (id: number) => {
+    if (columnTitleInput.trim()) {
+      try {
+        const col = columns.find(c => c.id === id);
+        if (col) {
+          await api.updateColumn(id, { ...col, title: columnTitleInput });
+          setEditingColumnId(null);
+          fetchData();
+        }
+      } catch (err) {
+        console.error("Error renaming column", err);
+      }
+    }
+  };
+
+  const handleDeleteColumn = async (id: number) => {
+    if (window.confirm("Excluir esta coluna apagará todas as tarefas nela. Continuar?")) {
+      try {
+        await api.deleteColumn(id);
+        fetchData();
+      } catch (err) {
+        console.error("Error deleting column", err);
+      }
+    }
+  };
+
+  const onDragEnd = async (result: DropResult) => {
+    const { destination, source, draggableId } = result;
+
+    if (!destination) return;
+    if (destination.droppableId === source.droppableId && destination.index === source.index) return;
+
+    const taskId = parseInt(draggableId);
+    const newColumnId = parseInt(destination.droppableId);
+    const newPosition = destination.index;
+
+    // Otimização Otimista
+    const updatedTasks = Array.from(tasks);
+    const taskIndex = updatedTasks.findIndex(t => t.id === taskId);
+    if (taskIndex !== -1) {
+      updatedTasks[taskIndex].column_id = newColumnId;
+      updatedTasks[taskIndex].position = newPosition;
+      setTasks(updatedTasks);
+    }
+
     try {
-      await api.updateTask(id, { status });
-      fetchData();
+      await api.updateTask(taskId, { 
+        column_id: newColumnId,
+        position: newPosition 
+      });
+      fetchData(); // Sincroniza posições de todos
     } catch (err) {
-      console.error("Error updating status", err);
+      console.error("Error moving task", err);
+      fetchData(); // Reverte em caso de erro
     }
   };
 
@@ -96,50 +173,6 @@ function App() {
     setIsDetailOpen(true);
   };
 
-  const renderColumn = (status: 'todo' | 'in_progress' | 'done', title: string) => {
-    const columnTasks = tasks.filter(t => t.status === status);
-    return (
-      <div className="column">
-        <div className="column-header">
-          <span className="column-title">{title}</span>
-          <span className="task-count">{columnTasks.length}</span>
-        </div>
-        <div className="task-list">
-          {columnTasks.map(task => (
-            <div key={task.id} className="task-card" onClick={() => openDetail(task)}>
-              <div className="task-card-header">
-                <span className="task-category">
-                  {task.category_emoji} {task.category_name}
-                </span>
-                <div className={`priority-dot priority-${task.priority}`} title={task.priority} />
-              </div>
-              <h3 className="task-title">{task.title}</h3>
-              <div className="task-footer">
-                <div className="task-date">
-                  <Clock size={12} />
-                  {task.due_date ? new Date(task.due_date).toLocaleDateString('pt-BR') : 'Sem data'}
-                </div>
-                <div className="task-actions">
-                  <button className="icon-btn" onClick={(e) => { e.stopPropagation(); openEdit(task); }}>
-                    <Edit2 size={14} />
-                  </button>
-                  {status !== 'done' && (
-                    <button className="icon-btn" onClick={(e) => { 
-                      e.stopPropagation(); 
-                      updateStatus(task.id, status === 'todo' ? 'in_progress' : 'done');
-                    }}>
-                      <ArrowRight size={14} />
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div className="app-container">
       <header>
@@ -147,16 +180,103 @@ function App() {
           <h1>Gravidade Zero</h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Gestão de tarefas em órbita 🚀</p>
         </div>
-        <button className="btn-new" onClick={() => { setFormData({ priority: 'Média', status: 'todo' }); setIsModalOpen(true); }}>
-          <Plus size={20} /> Nova Tarefa
-        </button>
+        <div className="header-actions">
+          <button className="btn-secondary" onClick={handleAddColumn}>
+            <List size={18} /> Nova Coluna
+          </button>
+          <button className="btn-new" onClick={() => { setFormData({ priority: 'Média' }); setIsModalOpen(true); }}>
+            <Plus size={20} /> Nova Tarefa
+          </button>
+        </div>
       </header>
 
-      <div className="kanban-board">
-        {renderColumn('todo', 'A Fazer')}
-        {renderColumn('in_progress', 'Em Progresso')}
-        {renderColumn('done', 'Concluída')}
-      </div>
+      <DragDropContext onDragEnd={onDragEnd}>
+        <div className="kanban-board">
+          {columns.map(column => (
+            <div key={column.id} className="column">
+              <div className="column-header">
+                {editingColumnId === column.id ? (
+                  <input
+                    autoFocus
+                    className="column-title-edit"
+                    value={columnTitleInput}
+                    onChange={e => setColumnTitleInput(e.target.value)}
+                    onBlur={() => handleRenameColumn(column.id)}
+                    onKeyDown={e => e.key === 'Enter' && handleRenameColumn(column.id)}
+                  />
+                ) : (
+                  <span 
+                    className="column-title" 
+                    onClick={() => { setEditingColumnId(column.id); setColumnTitleInput(column.title); }}
+                  >
+                    {column.title}
+                  </span>
+                )}
+                <div className="column-header-right">
+                  <span className="task-count">{tasks.filter(t => t.column_id === column.id).length}</span>
+                  <button className="icon-btn-danger" onClick={() => handleDeleteColumn(column.id)}>
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              </div>
+
+              <Droppable droppableId={column.id.toString()}>
+                {(provided, snapshot) => (
+                  <div 
+                    className={`task-list ${snapshot.isDraggingOver ? 'dragging-over' : ''}`}
+                    {...provided.droppableProps}
+                    ref={provided.innerRef}
+                  >
+                    {tasks
+                      .filter(t => t.column_id === column.id)
+                      .sort((a, b) => a.position - b.position)
+                      .map((task, index) => (
+                        <Draggable key={task.id} draggableId={task.id.toString()} index={index}>
+                          {(provided, snapshot) => (
+                            <div 
+                              className={`task-card ${snapshot.isDragging ? 'is-dragging' : ''}`}
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              onClick={() => openDetail(task)}
+                            >
+                              <div className="task-card-header">
+                                <span className="task-category">
+                                  {task.category_emoji} {task.category_name}
+                                </span>
+                                <div className={`priority-dot priority-${task.priority}`} />
+                              </div>
+                              <h3 className="task-title">{task.title}</h3>
+                              <div className="task-footer">
+                                <div className="task-date">
+                                  <Clock size={12} />
+                                  {task.due_date ? new Date(task.due_date).toLocaleDateString('pt-BR') : 'Sem data'}
+                                </div>
+                                <div className="task-actions">
+                                  <button className="icon-btn" onClick={(e) => { e.stopPropagation(); openEdit(task); }}>
+                                    <Edit2 size={13} />
+                                  </button>
+                                  <button className="icon-btn delete-btn" onClick={(e) => { e.stopPropagation(); handleDelete(task.id); }}>
+                                    <Trash2 size={13} />
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            </div>
+          ))}
+          <button className="add-column-ghost" onClick={handleAddColumn}>
+             <Plus size={24} />
+             <span>Adicionar Coluna</span>
+          </button>
+        </div>
+      </DragDropContext>
 
       {/* Modal Criar/Editar */}
       {isModalOpen && (
@@ -206,13 +326,24 @@ function App() {
                   </select>
                 </div>
               </div>
-              <div className="form-group">
-                <label>Data de Vencimento</label>
-                <input 
-                  type="date" 
-                  value={formData.due_date || ''} 
-                  onChange={e => setFormData({...formData, due_date: e.target.value})}
-                />
+              <div className="form-group" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label>Data de Vencimento</label>
+                  <input 
+                    type="date" 
+                    value={formData.due_date || ''} 
+                    onChange={e => setFormData({...formData, due_date: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <label>Coluna</label>
+                  <select 
+                    value={formData.column_id || ''} 
+                    onChange={e => setFormData({...formData, column_id: parseInt(e.target.value)})}
+                  >
+                    {columns.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
+                  </select>
+                </div>
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn-cancel" onClick={() => setIsModalOpen(false)}>Cancelar</button>
@@ -233,7 +364,7 @@ function App() {
                 <button className="icon-btn" onClick={() => { setIsDetailOpen(false); openEdit(selectedTask); }}>
                   <Edit2 size={18} />
                 </button>
-                <button className="icon-btn" style={{ color: 'var(--high)' }} onClick={() => handleDelete(selectedTask.id)}>
+                <button className="icon-btn danger" onClick={() => handleDelete(selectedTask.id)}>
                   <Trash2 size={18} />
                 </button>
                 <button className="icon-btn" onClick={() => setIsDetailOpen(false)}>✕</button>
@@ -250,13 +381,6 @@ function App() {
               <div className="task-date">
                 <div className={`priority-dot priority-${selectedTask.priority}`} /> <b>Prioridade:</b> {selectedTask.priority}
               </div>
-            </div>
-            <div className="modal-footer">
-               {selectedTask.status !== 'done' && (
-                 <button className="btn-save" onClick={() => { updateStatus(selectedTask.id, 'done'); setIsDetailOpen(false); }}>
-                   Marcar como Concluída
-                 </button>
-               )}
             </div>
           </div>
         </div>
