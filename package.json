@@ -1,16 +1,18 @@
 {
-  "name": "frontend",
+  "name": "kanban-gravidade-zero",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "vercel-dev": "npx vercel dev",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
+    "@libsql/client": "^0.17.2",
     "axios": "^1.14.0",
     "lucide-react": "^1.7.0",
     "react": "^19.2.4",
@@ -21,6 +23,7 @@
     "@types/node": "^24.12.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "@vercel/node": "^5.7.7",
     "@vitejs/plugin-react": "^6.0.1",
     "eslint": "^9.39.4",
     "eslint-plugin-react-hooks": "^7.0.1",

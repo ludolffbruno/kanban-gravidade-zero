@@ -1,13 +1,15 @@
-import { Database } from "bun:sqlite";
-import { join } from "path";
+import { createClient } from "@libsql/client";
 
-const DB_PATH = join(import.meta.dir, "..", "db", "kanban.sqlite");
+// No Vercel, devemos preencher TURSO_DATABASE_URL em Environment Variables
+// Em modo de desenvolvimento local, vai usar o banco SQLite em arquivo.
+export const db = createClient({
+  url: process.env.TURSO_DATABASE_URL || "file:./kanban.sqlite",
+  authToken: process.env.TURSO_AUTH_TOKEN,
+});
 
-export const db = new Database(DB_PATH);
-
-export function initDB() {
-  // Tabela de Categorias
-  db.run(`
+// A inicialização das tabelas pode rodar sempre que necessário
+export async function initDB() {
+  await db.execute(`
     CREATE TABLE IF NOT EXISTS categories (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
@@ -15,8 +17,7 @@ export function initDB() {
     )
   `);
 
-  // Nova Tabela de Colunas
-  db.run(`
+  await db.execute(`
     CREATE TABLE IF NOT EXISTS columns (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       title TEXT NOT NULL,
@@ -24,8 +25,7 @@ export function initDB() {
     )
   `);
 
-  // Tabela de Tarefas Atualizada
-  db.run(`
+  await db.execute(`
     CREATE TABLE IF NOT EXISTS tasks (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       title TEXT NOT NULL,
@@ -41,8 +41,7 @@ export function initDB() {
     )
   `);
 
-  // Tabela de Comentários
-  db.run(`
+  await db.execute(`
     CREATE TABLE IF NOT EXISTS comments (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       task_id INTEGER,
