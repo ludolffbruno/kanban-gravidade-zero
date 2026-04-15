@@ -43,22 +43,23 @@
 
 | Camada | Tecnologia |
 |--------|-----------|
-| **Frontend** | React 18 + TypeScript + Vite |
-| **Backend** | Bun runtime + HTTP server nativo |
-| **Banco de Dados** | SQLite via `bun:sqlite` (sem ORM, zero deps) |
+| **Frontend** | React 19 + TypeScript + Vite |
+| **Backend** | Vercel Serverless Functions (`/api`) |
+| **Banco de Dados** | SQLite (Local via arquivo) / Turso (Produção na Nuvem) |
+| **Client SQL** | `@libsql/client` |
 | **Drag & Drop** | `@hello-pangea/dnd` |
 | **Ícones** | `lucide-react` |
-| **HTTP Client** | `axios` |
 | **Estilo** | CSS puro com variáveis e glassmorphism |
 
 ---
 
-## ▶️ Como Rodar
+## 🚀 Como Rodar e Fazer Deploy
 
-### Pré-requisitos
+O projeto foi migrado para suportar **Vercel Serverless** e **Turso Database**.
 
-- [Bun](https://bun.sh) `>= 1.0`
-- [Node.js](https://nodejs.org) `>= 20.x` (para o Vite)
+### Pré-requisitos (Desenvolvimento Local)
+- [Node.js](https://nodejs.org) `>= 20.x`
+- Vercel CLI (opcional, mas recomendado)
 
 ### 1. Clone o repositório
 
@@ -67,95 +68,86 @@ git clone https://github.com/ludolffbruno/kanban-gravidade-zero.git
 cd kanban-gravidade-zero
 ```
 
-### 2. Instale as dependências
+### 2. Instalar e rodar localmente (Modo Desenvolvimento)
+
+Em desenvolvimento, o app gera e usa um arquivo `kanban.sqlite` na raiz via LibSQL.
 
 ```bash
-# Backend
-cd backend && bun install
-
-# Frontend
-cd ../frontend && npm install
+npm install
 ```
 
-### 3. Popule o banco de dados
+Para gerar as tabelas de banco locais:
+Abra o navegador e acesse a rota (com o backend rodando): `http://localhost:3000/api/seed`
 
+Rodando com Vercel CLI (simula Serverless e Frontend na mesma porta 3000):
 ```bash
-cd backend
-bun run seed.ts
+npm run vercel-dev
 ```
+Se não quiser usar a cli da vercel, você precisaria subir a vercel em outra plataforma, mas a recomendada para rodar o fullstack é a vercel cli.
 
-### 4. Inicie os servidores
+### 3. Deploy para Produção na Vercel & Turso
 
-**Backend** (porta 3030):
-```bash
-cd backend
-bun run --watch index.ts
-```
+Como a Vercel tem discos efêmeros (somente leitura real), você **deve** usar um banco remoto em produção, recomendamos o [Turso](https://turso.tech).
 
-**Frontend** (porta 5173):
-```bash
-cd frontend
-npm run dev
-```
-
-### 5. Acesse no navegador
-
-```
-http://localhost:5173
-```
+1. Crie um banco no Turso e pegue a URL (`libsql://...`) e o Auth Token.
+2. Na sua Vercel, crie um novo projeto importando este repositório.
+3. Nas variáveis de ambiente da Vercel, adicione:
+   - `TURSO_DATABASE_URL`: `sua_url_do_turso`
+   - `TURSO_AUTH_TOKEN`: `seu_token_do_turso`
+4. Dê Deploy!
+5. Importante: no primeiro acesso, abra `/api/seed` na URL de produção gerada pela Vercel para criar as tabelas no Turso.
 
 ---
 
 ## 📁 Estrutura do Projeto
 
 ```
-Aplicativo Web de gestão de tarefas (To-Do)/
-├── backend/
-│   ├── index.ts          # Servidor HTTP + rotas REST
-│   ├── database.ts       # Conexão e schema SQLite
-│   ├── seed.ts           # Dados iniciais (categorias + tarefas)
-│   └── package.json
-├── frontend/
-│   ├── src/
-│   │   ├── App.tsx       # Componente principal (board Kanban)
-│   │   ├── App.css       # Estilos premium dark mode
-│   │   └── api.ts        # Funções de comunicação com o backend
-│   ├── index.html
-│   └── package.json
-├── db/
-│   └── kanban.sqlite     # Banco de dados (gerado ao rodar seed)
+kanban-gravidade-zero/
+├── api/                  # Backend Serverless Functions (Vercel)
+│   ├── db.ts             # Conexão LibSQL (Local/Turso)
+│   ├── seed.ts           # Rota para rodar tabelas
+│   ├── tasks.ts
+│   ├── tasks/[id].ts
+│   ├── columns.ts
+│   ├── columns/[id].ts
+│   └── categories.ts
+├── src/                  # Frontend (React + Vite)
+│   ├── api.ts            # Client Axios apontando para /api
+│   ├── App.tsx           
+│   └── App.css           
+├── package.json
 └── README.md
 ```
 
 ---
 
-## 📡 Endpoints da API
+## 📡 Endpoints da API (Serverless Routes)
 
-Base URL: `http://localhost:3030/api`
+Base URL: `/api` (Relativo)
 
 ### Tarefas
 
 | Método | Rota | Descrição |
 |--------|------|-----------|
-| `GET` | `/tasks` | Listar todas as tarefas |
-| `POST` | `/tasks` | Criar nova tarefa |
-| `PUT` | `/tasks/:id` | Atualizar tarefa |
-| `DELETE` | `/tasks/:id` | Excluir tarefa |
+| `GET` | `/api/tasks` | Listar todas as tarefas |
+| `POST` | `/api/tasks` | Criar nova tarefa |
+| `PUT` | `/api/tasks/:id` | Atualizar tarefa |
+| `DELETE`| `/api/tasks/:id` | Excluir tarefa |
 
 ### Colunas
 
 | Método | Rota | Descrição |
 |--------|------|-----------|
-| `GET` | `/columns` | Listar colunas |
-| `POST` | `/columns` | Criar nova coluna |
-| `PUT` | `/columns/:id` | Renomear coluna |
-| `DELETE` | `/columns/:id` | Excluir coluna e suas tarefas |
+| `GET` | `/api/columns` | Listar colunas |
+| `POST` | `/api/columns` | Criar nova coluna |
+| `PUT` | `/api/columns/:id` | Renomear coluna |
+| `DELETE`| `/api/columns/:id` | Excluir coluna e suas tarefas |
 
 ### Categorias
 
 | Método | Rota | Descrição |
 |--------|------|-----------|
-| `GET` | `/categories` | Listar categorias disponíveis |
+| `GET` | `/api/categories`| Listar categorias disponíveis |
 
 ---
 
