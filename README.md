@@ -63,9 +63,8 @@
 ### 1. Clone o repositório
 
 ```bash
-git clone https://github.com/ludolffbruno/Personal-projects.git
-git checkout kanban-todo
-cd "Aplicativo Web de gestão de tarefas (To-Do)"
+git clone https://github.com/ludolffbruno/kanban-gravidade-zero.git
+cd kanban-gravidade-zero
 ```
 
 ### 2. Instale as dependências
@@ -181,7 +180,7 @@ O board suporta criação de colunas extras como **Revisão**, **Teste**, **Bloq
 **Bruno Ludolff**
 
 - GitHub: [@ludolffbruno](https://github.com/ludolffbruno)
-- Projeto: [Personal-projects / kanban-todo](https://github.com/ludolffbruno/Personal-projects/tree/kanban-todo)
+- Projeto: [kanban-gravidade-zero](https://github.com/ludolffbruno/kanban-gravidade-zero)
 
 ---
 
