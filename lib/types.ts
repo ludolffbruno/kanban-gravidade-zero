@@ -1,0 +1,28 @@
+export interface Category {
+  id: number;
+  name: string;
+  color: string;
+}
+
+export interface Column {
+  id: number;
+  name: string;
+  position: number;
+}
+
+export interface Task {
+  id: number;
+  title: string;
+  description: string | null;
+  column_id: number;
+  category_id: number | null;
+  position: number;
+  created_at: string;
+  category?: Category | null;
+}
+
+export interface TaskFormData {
+  title: string;
+  description: string;
+  category_id: number | null;
+}
