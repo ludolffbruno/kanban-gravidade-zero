@@ -1,6 +1,6 @@
 /* Created by: Bruno Ludolff */
 import { useState, useEffect } from 'react'
-import { Plus, Clock, Edit2, Trash2, ArrowRight, List } from 'lucide-react'
+import { Plus, Clock, Edit2, Trash2, List } from 'lucide-react'
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
 import type { DropResult } from '@hello-pangea/dnd'
 import * as api from './api'
