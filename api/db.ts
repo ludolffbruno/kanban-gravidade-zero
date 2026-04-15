@@ -1,4 +1,4 @@
-import { createClient } from "@libsql/client";
+import { createClient } from "@libsql/client/web";
 
 // No Vercel, devemos preencher TURSO_DATABASE_URL em Environment Variables
 // Em modo de desenvolvimento local, vai usar o banco SQLite em arquivo.
