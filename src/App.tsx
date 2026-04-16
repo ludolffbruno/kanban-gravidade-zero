@@ -226,17 +226,21 @@ const App = () => {
   };
 
   const handleRenameColumn = async (id: number) => {
+    // Guarda contra double-call (Enter + onBlur)
+    if (editingColumnId === null) return;
     if (columnTitleInput.trim()) {
       try {
         const col = columns.find(c => c.id === id);
         if (col) {
+          setEditingColumnId(null); // seta null ANTES do await para bloquear segundo call
           await api.updateColumn(id, { ...col, title: columnTitleInput });
-          setEditingColumnId(null);
           fetchData();
         }
       } catch (err) {
         console.error("Error renaming column", err);
       }
+    } else {
+      setEditingColumnId(null); // cancela se vazio
     }
   };
 
@@ -467,7 +471,14 @@ const App = () => {
                                 value={columnTitleInput}
                                 onChange={e => setColumnTitleInput(e.target.value)}
                                 onBlur={() => handleRenameColumn(column.id)}
-                                onKeyDown={e => e.key === 'Enter' && handleRenameColumn(column.id)}
+                                onKeyDown={e => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    e.currentTarget.blur(); // dispara onBlur uma única vez
+                                  } else if (e.key === 'Escape') {
+                                    setEditingColumnId(null); // cancela sem salvar
+                                  }
+                                }}
                               />
                             ) : (
                               <span 
