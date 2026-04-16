@@ -697,67 +697,157 @@ h1 {
   width: 60%;
 }
 
+/* ── Developer Footer ─────────────────────────────────────────────── */
+.dev-footer {
+  text-align: center;
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  opacity: 0.45;
+  padding: 0.6rem 0 0.2rem;
+  flex-shrink: 0;
+  letter-spacing: 0.03em;
+  transition: opacity 0.2s;
+}
+
+.dev-footer:hover {
+  opacity: 0.75;
+}
+
+.dev-footer a {
+  color: var(--brand);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.dev-footer a:hover {
+  text-decoration: underline;
+}
+
+/* ── Mobile ───────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .app-container {
-    padding: 1rem;
+    padding: 0.6rem 0.6rem 0;
     height: 100dvh;
+    height: 100svh; /* safe fallback */
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
   }
 
+  /* ── Header compacto horizontal ── */
   header {
-    margin-bottom: 1.5rem;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 0.4rem;
+    margin-bottom: 0.6rem;
+    padding: 0 0.2rem;
+    flex-shrink: 0;
+  }
+
+  header > div:first-child {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-width: 0;
   }
 
   h1 {
-    font-size: 1.5rem;
+    font-size: 1.1rem;
+    white-space: nowrap;
   }
 
   header p {
-    font-size: 0.8rem !important;
+    display: none !important;
   }
 
-  .btn-label, .user-name-label {
-    display: none;
+  /* ── Esconde labels de botão e nome de usuário ── */
+  .btn-label,
+  .user-name-label {
+    display: none !important;
   }
 
   .header-actions {
-    gap: 0.5rem;
+    gap: 0.35rem;
+    flex-wrap: nowrap;
+    flex-shrink: 0;
   }
 
   .user-profile {
-    padding: 0.25rem;
+    padding: 0.2rem;
   }
 
-  .btn-new, .btn-secondary, .btn-login {
-    padding: 0.6rem;
+  .user-profile img {
+    width: 28px;
+    height: 28px;
+  }
+
+  .btn-new,
+  .btn-secondary,
+  .btn-login,
+  .btn-logout {
+    padding: 0.5rem;
     border-radius: 10px;
+    min-width: unset;
   }
 
+  /* ── Board + colunas ── */
   .kanban-board {
-    gap: 1rem;
-    padding-bottom: 2rem;
+    flex: 1 1 0;
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    gap: 0.6rem;
+    padding: 0 0.6rem 0.5rem;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;       /* Firefox */
+    -ms-overflow-style: none;    /* IE/Edge */
+  }
+
+  .kanban-board::-webkit-scrollbar {
+    display: none;
   }
 
   .column {
-    width: 85vw;
-    min-width: 85vw;
-    max-height: calc(100% - 20px);
-    scroll-snap-align: center;
+    width: 88vw;
+    min-width: 88vw;
+    max-width: 88vw;
+    flex-shrink: 0;
+    scroll-snap-align: start;
+    /* garante que a coluna não ultrapasse a viewport vertical */
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .task-list {
+    flex: 1 1 0;
+    overflow-y: auto;
+    scrollbar-width: thin;
   }
 
   .add-column-ghost {
-    min-width: 80vw;
-    scroll-snap-align: center;
+    min-width: 150px;
+    scroll-snap-align: start;
   }
 
+  /* ── Modal adaptado ── */
   .modal-content {
-    padding: 1.5rem;
-    width: 95%;
-    max-height: 90vh;
+    padding: 1.25rem;
+    width: 96%;
+    max-height: 88dvh;
     overflow-y: auto;
   }
+
+  /* ── Prevenir scroll horizontal na página ── */
+  body {
+    overflow-x: hidden;
+  }
 }
+
 
 @media (max-width: 900px) {
   .landing-page {

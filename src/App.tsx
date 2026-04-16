@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react'
 import { Plus, Clock, Edit2, Trash2, List, LogIn, LogOut, GripVertical } from 'lucide-react'
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
 import type { DropResult } from '@hello-pangea/dnd'
-import Joyride, { CallBackProps, STATUS, Step } from 'react-joyride'
+import { Joyride, STATUS } from 'react-joyride'
+import type { EventData as CallBackProps, Step } from 'react-joyride'
 import { auth, googleProvider } from './lib/firebase'
 import { signInWithPopup, signOut, onAuthStateChanged, type User } from 'firebase/auth'
 import * as api from './api'
@@ -50,7 +51,7 @@ const App = () => {
     {
       target: '.kanban-board',
       content: 'Bem-vindo ao Gravidade Zero! 🚀 Este é o seu painel. Tudo aqui acontece em tempo real.',
-      disableBeacon: true,
+      skipBeacon: true,
     },
     {
       target: '.column',
@@ -296,23 +297,22 @@ const App = () => {
   return (
     <div className="app-container">
       <Joyride
-        callback={handleJoyrideCallback}
+        onEvent={handleJoyrideCallback}
         continuous
-        hideAssistant
         run={runTour}
         scrollToFirstStep
-        showProgress
-        showSkipButton
         steps={tourSteps}
+        options={{
+          zIndex: 10000,
+          primaryColor: '#6366f1',
+          backgroundColor: '#1e293b',
+          textColor: '#f8fafc',
+          arrowColor: '#1e293b',
+          showProgress: true,
+          buttons: ['back', 'close', 'primary', 'skip'],
+        }}
         styles={{
-          options: {
-            zIndex: 10000,
-            primaryColor: '#6366f1',
-            backgroundColor: '#1e293b',
-            textColor: '#f8fafc',
-            arrowColor: '#1e293b',
-          },
-          buttonNext: {
+          buttonPrimary: {
             borderRadius: '8px',
             fontSize: '14px',
             padding: '8px 16px',
@@ -664,6 +664,9 @@ const App = () => {
           </div>
         </div>
       )}
+      <footer className="dev-footer">
+        Desenvolvido por <a href="https://github.com/ludolffbruno" target="_blank" rel="noopener noreferrer">MrLudolff</a>
+      </footer>
     </div>
   )
 }
