@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Plus, Clock, Edit2, Trash2, List, LogIn, LogOut, GripVertical } from 'lucide-react'
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
 import type { DropResult } from '@hello-pangea/dnd'
@@ -47,6 +47,8 @@ const App = () => {
   const [columnTitleInput, setColumnTitleInput] = useState('');
   const [newColumnTitle, setNewColumnTitle] = useState('');
   const [runTour, setRunTour] = useState(false);
+  const boardRef = useRef<HTMLDivElement | null>(null);
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   const [tourSteps] = useState<Step[]>([
     {
       target: '.kanban-board',
@@ -86,6 +88,13 @@ const App = () => {
 
     return () => unsubscribe();
   }, []);
+
+  // Reseta scroll do board para o início sempre que as colunas carregarem
+  useEffect(() => {
+    if (columns.length > 0 && boardRef.current) {
+      boardRef.current.scrollLeft = 0;
+    }
+  }, [columns]);
 
   const handleLogin = async () => {
     try {
@@ -299,7 +308,7 @@ const App = () => {
       <Joyride
         onEvent={handleJoyrideCallback}
         continuous
-        run={runTour}
+        run={runTour && !isMobile}
         scrollToFirstStep
         steps={tourSteps}
         options={{
@@ -425,7 +434,10 @@ const App = () => {
               <div 
                 className="kanban-board"
                 {...provided.droppableProps}
-                ref={provided.innerRef}
+                ref={(el) => {
+                  provided.innerRef(el);
+                  boardRef.current = el;
+                }}
               >
                 {columns.sort((a, b) => a.position - b.position).map((column, index) => (
                   <Draggable key={column.id} draggableId={column.id.toString()} index={index}>

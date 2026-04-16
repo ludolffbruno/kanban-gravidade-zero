@@ -832,10 +832,10 @@ h1 {
 
   /* ── Coluna ── */
   .column {
-    /* Largura: viewport menos o padding bilateral do board (2 × 0.7rem = 1.4rem) */
-    width: calc(100vw - 1.4rem);
-    min-width: calc(100vw - 1.4rem);
-    max-width: calc(100vw - 1.4rem);
+    /* 82vw = mostra ~18vw da próxima coluna como «peek» */
+    width: 82vw;
+    min-width: 82vw;
+    max-width: 82vw;
     flex-shrink: 0;
     scroll-snap-align: start;
 
