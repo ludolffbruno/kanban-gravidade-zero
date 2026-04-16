@@ -353,13 +353,13 @@ const App = () => {
             <>
               <div className="user-profile">
                 <img src={user.photoURL || ''} alt={user.displayName || ''} />
-                <span>{user.displayName}</span>
+                <span className="user-name-label">{user.displayName}</span>
               </div>
-              <button className="btn-secondary" onClick={handleAddColumn}>
-                <List size={18} /> Nova Coluna
+              <button className="btn-secondary" onClick={handleAddColumn} title="Nova Coluna">
+                <List size={18} /> <span className="btn-label">Nova Coluna</span>
               </button>
-              <button className="btn-new" onClick={() => { setFormData({ priority: 'Média' }); setIsModalOpen(true); }}>
-                <Plus size={20} /> Nova Tarefa
+              <button className="btn-new" onClick={() => { setFormData({ priority: 'Média' }); setIsModalOpen(true); }} title="Nova Tarefa">
+                <Plus size={20} /> <span className="btn-label">Nova Tarefa</span>
               </button>
               <button className="btn-logout" onClick={handleLogout} title="Sair">
                 <LogOut size={18} />
