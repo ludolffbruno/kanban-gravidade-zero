@@ -1,25 +1,22 @@
 <div align="center">
 
-<h1>🚀 Gravidade Zero</h1>
-<p><strong>Gerenciador de tarefas Kanban premium com drag & drop, colunas dinâmicas e design dark mode.</strong></p>
+<img src="./docs/assets/banner.png" alt="Gravidade Zero — Kanban Board" width="100%" />
 
-<p>
-  <img src="https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=white" />
-  <img src="https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white" />
-  <img src="https://img.shields.io/badge/Bun-1.x-fbf0df?style=flat-square&logo=bun&logoColor=black" />
-  <img src="https://img.shields.io/badge/SQLite-003B57?style=flat-square&logo=sqlite&logoColor=white" />
-  <img src="https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white" />
-  <img src="https://img.shields.io/badge/Licença-MIT-green?style=flat-square" />
-</p>
+<br/><br/>
 
-<p>
-  <a href="#-funcionalidades">✨ Funcionalidades</a> •
-  <a href="#-stack-técnica">🛠️ Stack</a> •
-  <a href="#-como-rodar">▶️ Como Rodar</a> •
-  <a href="#-estrutura-do-projeto">📁 Estrutura</a> •
-  <a href="#-endpoints-da-api">📡 API</a> •
-  <a href="#-autor">👤 Autor</a>
-</p>
+# 🚀 Gravidade Zero
+
+**Gerenciador de tarefas Kanban premium com drag & drop, multi-temas, autenticação Google e dados na nuvem.**
+
+[![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=white)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![Vite](https://img.shields.io/badge/Vite-5-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev)
+[![Firebase](https://img.shields.io/badge/Firebase-Auth-FFCA28?style=flat-square&logo=firebase&logoColor=black)](https://firebase.google.com)
+[![Turso](https://img.shields.io/badge/Turso-SQLite-4FF8D2?style=flat-square&logo=sqlite&logoColor=black)](https://turso.tech)
+[![Vercel](https://img.shields.io/badge/Deploy-Vercel-000000?style=flat-square&logo=vercel&logoColor=white)](https://vercel.com)
+[![MIT License](https://img.shields.io/badge/Licença-MIT-22c55e?style=flat-square)](./LICENSE)
+
+[✨ Demo ao vivo](https://kanban-gravidade-zero.vercel.app) · [📋 Funcionalidades](#-funcionalidades) · [🛠️ Stack](#-stack-técnica) · [▶️ Como Rodar](#-como-rodar) · [📡 API](#-endpoints-da-api)
 
 </div>
 
@@ -27,15 +24,52 @@
 
 ## ✨ Funcionalidades
 
-- **📋 Board Kanban** — Organize suas tarefas em colunas de status com contadores em tempo real
-- **🖱️ Drag & Drop** — Arraste cards entre colunas com animações fluidas (powered by `@hello-pangea/dnd`)
-- **➕ Colunas Dinâmicas** — Crie, renomeie (clique no título) e exclua colunas livremente
-- **✏️ CRUD Completo** — Crie, edite e exclua tarefas com título, descrição, prioridade, categoria e data
-- **🔴🟡🟢 Prioridades Visuais** — Indicadores coloridos de Alta, Média e Baixa prioridade em cada card
-- **🏷️ Categorias com Emoji** — Trabalho 💼, Estudo 📚, Saúde 🍎, Pessoal 🏠, Finanças 💰
-- **🌙 Dark Mode** — Interface premium com tema escuro e efeito glassmorphism
-- **📱 Responsivo** — Layout adaptável para diferentes tamanhos de tela
-- **💾 Persistência Real** — Dados salvos em banco SQLite via Bun nativo
+| Funcionalidade | Descrição |
+|---|---|
+| 🔐 **Login com Google** | Autenticação segura via Firebase — cada usuário vê apenas seus próprios dados |
+| 📋 **Board Kanban Completo** | Colunas dinâmicas com contadores em tempo real |
+| 🖱️ **Drag & Drop** | Arraste cards entre colunas e reordene as próprias colunas com animações fluidas |
+| ➕ **Colunas Dinâmicas** | Crie, renomeie clicando no título (`Enter` ✓, `Esc` cancela) e exclua colunas |
+| ✏️ **CRUD de Tarefas** | Título, descrição, prioridade, categoria e data de entrega |
+| 🎨 **8 Temas Espaciais** | Nebulosa, Void, Aurora Boreal, Erupção Solar, Cosmos, Lua (claro!), Marte, Buraco Negro |
+| 🔴🟡🟢 **Prioridades Visuais** | Indicadores coloridos de Alta, Média e Baixa prioridade |
+| 🏷️ **Categorias com Emoji** | Trabalho 💼, Estudo 📚, Saúde 🍎, Pessoal 🏠, Finanças 💰 |
+| 📱 **Mobile First** | Swipe horizontal entre colunas com scroll-snap nativo — funciona perfeitamente no celular |
+| 💾 **Persistência Real** | Banco SQLite na nuvem via Turso, isolado por usuário |
+| 🌐 **PWA-Ready** | Funciona como app instalável no celular |
+
+---
+
+## 📸 Preview
+
+<img src="./docs/assets/banner.png" alt="Desktop Preview" width="100%" />
+
+<br/>
+
+<div align="center">
+  <img src="./docs/assets/mobile-preview.png" alt="Mobile Preview — tema Nebulosa e Cosmos" width="60%" />
+  <br/>
+  <sub>Mobile: tema Nebulosa (esquerda) · tema Cosmos (direita)</sub>
+</div>
+
+---
+
+## 🎨 Sistema de Temas
+
+Clique na sua foto de perfil para acessar o painel de aparência com **8 temas espaciais**:
+
+| Tema | Esquema de Cor |
+|------|---------------|
+| 🪐 **Nebulosa** *(padrão)* | Azul profundo + Índigo |
+| 🟢 **Void** | Preto absoluto + Verde Cyber |
+| 🌌 **Aurora Boreal** | Verde escuro + Teal |
+| ☀️ **Erupção Solar** | Marrom + Laranja |
+| 🔮 **Cosmos** | Roxo profundo + Magenta |
+| 🌕 **Lua** | Cinza claro + Índigo *(único tema claro!)* |
+| 🔴 **Marte** | Vermelho escuro + Laranja |
+| ⚫ **Buraco Negro** | Preto puro + Violeta |
+
+> O tema escolhido é salvo automaticamente no `localStorage` e restaurado a cada visita.
 
 ---
 
@@ -43,59 +77,98 @@
 
 | Camada | Tecnologia |
 |--------|-----------|
-| **Frontend** | React 19 + TypeScript + Vite |
-| **Backend** | Vercel Serverless Functions (`/api`) |
-| **Banco de Dados** | SQLite (Local via arquivo) / Turso (Produção na Nuvem) |
-| **Client SQL** | `@libsql/client` |
+| **Frontend** | React 19 + TypeScript 5 + Vite 5 |
+| **Backend** | Vercel Serverless Functions (Node.js) |
+| **Banco de Dados** | Turso (SQLite na nuvem via `@libsql/client`) |
+| **Autenticação** | Firebase Auth (Google Sign-In) + Firebase Admin SDK |
 | **Drag & Drop** | `@hello-pangea/dnd` |
 | **Ícones** | `lucide-react` |
-| **Estilo** | CSS puro com variáveis e glassmorphism |
+| **Estilo** | CSS puro · Glassmorphism · CSS Custom Properties |
+| **Deploy** | Vercel (CI/CD automático via GitHub push) |
 
 ---
 
-## 🚀 Como Rodar e Fazer Deploy
+## 🔒 Segurança
 
-O projeto foi migrado para suportar **Vercel Serverless** e **Turso Database**.
+O sistema usa **isolamento completo em duas camadas**:
 
-### Pré-requisitos (Desenvolvimento Local)
+1. **Firebase Admin SDK** — verifica o token JWT em cada requisição. Sem token válido → `401 Unauthorized`.
+2. **Filtro por `user_id` no banco** — todas as queries SQL usam `WHERE user_id = ?` com o UID do token, garantindo que um usuário nunca acesse dados de outro.
+
+```
+Requisição → Bearer Token → verifyIdToken() → uid → WHERE user_id = uid
+```
+
+Nenhum dado sensível está no repositório. As credenciais vivem em variáveis de ambiente na Vercel.
+
+---
+
+## ▶️ Como Rodar
+
+### Pré-requisitos
+
 - [Node.js](https://nodejs.org) `>= 20.x`
-- Vercel CLI (opcional, mas recomendado)
+- Conta no [Firebase](https://firebase.google.com) (Auth com Google Sign-In habilitado)
+- Conta no [Turso](https://turso.tech) (banco SQLite na nuvem)
+- [Vercel CLI](https://vercel.com/docs/cli) (recomendado para dev local)
 
 ### 1. Clone o repositório
 
 ```bash
 git clone https://github.com/ludolffbruno/kanban-gravidade-zero.git
 cd kanban-gravidade-zero
-```
-
-### 2. Instalar e rodar localmente (Modo Desenvolvimento)
-
-Em desenvolvimento, o app gera e usa um arquivo `kanban.sqlite` na raiz via LibSQL.
-
-```bash
 npm install
 ```
 
-Para gerar as tabelas de banco locais:
-Abra o navegador e acesse a rota (com o backend rodando): `http://localhost:3000/api/seed`
+### 2. Configure as variáveis de ambiente
 
-Rodando com Vercel CLI (simula Serverless e Frontend na mesma porta 3000):
-```bash
-npm run vercel-dev
+Crie um arquivo `.env.local` na raiz (ou use `npx vercel env pull .env.local` se já tiver o projeto na Vercel):
+
+```env
+# Turso
+TURSO_DATABASE_URL=libsql://seu-banco.turso.io
+TURSO_AUTH_TOKEN=seu_token_turso
+
+# Firebase Client (frontend)
+VITE_FIREBASE_API_KEY=...
+VITE_FIREBASE_AUTH_DOMAIN=...
+VITE_FIREBASE_PROJECT_ID=...
+VITE_FIREBASE_APP_ID=...
+
+# Firebase Admin (backend serverless)
+FIREBASE_PROJECT_ID=...
+FIREBASE_CLIENT_EMAIL=...
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n..."
 ```
-Se não quiser usar a cli da vercel, você precisaria subir a vercel em outra plataforma, mas a recomendada para rodar o fullstack é a vercel cli.
 
-### 3. Deploy para Produção na Vercel & Turso
+### 3. Rode localmente
 
-Como a Vercel tem discos efêmeros (somente leitura real), você **deve** usar um banco remoto em produção, recomendamos o [Turso](https://turso.tech).
+```bash
+# Com Vercel CLI (recomendado — simula serverless + frontend na mesma porta)
+npx vercel dev
 
-1. Crie um banco no Turso e pegue a URL (`libsql://...`) e o Auth Token.
-2. Na sua Vercel, crie um novo projeto importando este repositório.
-3. Nas variáveis de ambiente da Vercel, adicione:
-   - `TURSO_DATABASE_URL`: `sua_url_do_turso`
-   - `TURSO_AUTH_TOKEN`: `seu_token_do_turso`
-4. Dê Deploy!
-5. Importante: no primeiro acesso, abra `/api/seed` na URL de produção gerada pela Vercel para criar as tabelas no Turso.
+# Ou com o dev server do Vite apenas (sem backend)
+npm run dev
+```
+
+### 4. Inicialize o banco
+
+No primeiro acesso, abra no navegador:
+
+```
+http://localhost:3000/api/seed
+```
+
+Isso cria as tabelas `tasks`, `columns`, `categories` e `users` no Turso.
+
+### 5. Deploy para produção
+
+```bash
+git push origin main
+# → Vercel detecta o push e faz deploy automático ✅
+```
+
+> **Importante:** adicione as mesmas variáveis de ambiente no painel da Vercel em **Settings → Environment Variables**.
 
 ---
 
@@ -103,76 +176,74 @@ Como a Vercel tem discos efêmeros (somente leitura real), você **deve** usar u
 
 ```
 kanban-gravidade-zero/
-├── api/                  # Backend Serverless Functions (Vercel)
-│   ├── db.ts             # Conexão LibSQL (Local/Turso)
-│   ├── seed.ts           # Rota para rodar tabelas
-│   ├── tasks.ts
-│   ├── tasks/[id].ts
-│   ├── columns.ts
-│   ├── columns/[id].ts
-│   └── categories.ts
-├── src/                  # Frontend (React + Vite)
-│   ├── api.ts            # Client Axios apontando para /api
-│   ├── App.tsx           
-│   └── App.css           
-├── package.json
+├── api/                      # Backend Serverless (Vercel Functions)
+│   ├── db.ts                 # Conexão LibSQL → Turso
+│   ├── seed.ts               # Cria as tabelas no banco
+│   ├── init-user.ts          # Inicializa dados padrão do usuário
+│   ├── tasks.ts              # CRUD de tarefas (GET, POST)
+│   ├── tasks/[id].ts         # CRUD por ID (PUT, DELETE)
+│   ├── columns.ts            # CRUD de colunas
+│   ├── columns/[id].ts       # Editar/excluir coluna por ID
+│   ├── columns/reorder.ts    # Reordenar colunas via drag & drop
+│   ├── categories.ts         # Listar categorias
+│   └── utils/
+│       └── auth.ts           # Middleware: verifyToken via Firebase Admin
+├── src/                      # Frontend (React + Vite)
+│   ├── api.ts                # Client Axios com interceptor de token
+│   ├── lib/firebase.ts       # Inicialização do Firebase
+│   ├── App.tsx               # Componente principal + lógica
+│   └── App.css               # Estilos globais + 8 temas espaciais
+├── docs/
+│   └── assets/               # Imagens do README
+├── vercel.json               # Configuração de rotas Vercel
 └── README.md
 ```
 
 ---
 
-## 📡 Endpoints da API (Serverless Routes)
+## 📡 Endpoints da API
 
-Base URL: `/api` (Relativo)
+> Todos os endpoints requerem o header `Authorization: Bearer <firebase_token>`.
 
 ### Tarefas
 
 | Método | Rota | Descrição |
 |--------|------|-----------|
-| `GET` | `/api/tasks` | Listar todas as tarefas |
+| `GET` | `/api/tasks` | Listar tarefas do usuário autenticado |
 | `POST` | `/api/tasks` | Criar nova tarefa |
 | `PUT` | `/api/tasks/:id` | Atualizar tarefa |
-| `DELETE`| `/api/tasks/:id` | Excluir tarefa |
+| `DELETE` | `/api/tasks/:id` | Excluir tarefa |
 
 ### Colunas
 
 | Método | Rota | Descrição |
 |--------|------|-----------|
-| `GET` | `/api/columns` | Listar colunas |
+| `GET` | `/api/columns` | Listar colunas do usuário |
 | `POST` | `/api/columns` | Criar nova coluna |
 | `PUT` | `/api/columns/:id` | Renomear coluna |
-| `DELETE`| `/api/columns/:id` | Excluir coluna e suas tarefas |
+| `DELETE` | `/api/columns/:id` | Excluir coluna e suas tarefas |
+| `POST` | `/api/columns/reorder` | Reordenar colunas após drag & drop |
 
-### Categorias
+### Outros
 
 | Método | Rota | Descrição |
 |--------|------|-----------|
-| `GET` | `/api/categories`| Listar categorias disponíveis |
-
----
-
-## 📸 Preview
-
-> Board com tarefas reais distribuídas nas colunas **A Fazer**, **Em Progresso** e **Concluída**.
-
-O board suporta criação de colunas extras como **Revisão**, **Teste**, **Bloqueado**, conforme a necessidade do fluxo de trabalho.
-
----
-
-## 🔒 Segurança
-
-- Nenhuma credencial ou informação sensível está presente no repositório
-- O banco de dados SQLite é gerado **localmente** via seed — não é versionado no Git
-- O arquivo `.gitignore` exclui `*.sqlite`, `*.log` e `node_modules`
+| `GET` | `/api/categories` | Listar categorias disponíveis |
+| `POST` | `/api/init-user` | Inicializar colunas padrão para novo usuário |
+| `GET` | `/api/seed` | Criar tabelas no banco (usar apenas uma vez) |
 
 ---
 
 ## 👤 Autor
 
-**Bruno Ludolff**
+<div align="center">
 
-- GitHub: [@ludolffbruno](https://github.com/ludolffbruno)
-- Projeto: [kanban-gravidade-zero](https://github.com/ludolffbruno/kanban-gravidade-zero)
+**Bruno Ludolff** · MrLudolff
+
+[![GitHub](https://img.shields.io/badge/GitHub-ludolffbruno-181717?style=flat-square&logo=github)](https://github.com/ludolffbruno)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=flat-square&logo=linkedin)](https://linkedin.com/in/ludolffbruno)
+
+</div>
 
 ---
 
@@ -183,5 +254,5 @@ Este projeto está licenciado sob a **MIT License** — sinta-se livre para usar
 ---
 
 <div align="center">
-  <sub>Feito com ☕ e muito TypeScript por Bruno Ludolff</sub>
+  <sub>Desenvolvido com ☕ e muito TypeScript · <strong>MrLudolff</strong> · 2025</sub>
 </div>
