@@ -174,9 +174,9 @@ h1 {
 
 .column {
   background-color: var(--bg-secondary);
-  width: 320px;
-  min-width: 320px;
-  border-radius: 16px;
+  width: 260px;
+  min-width: 260px;
+  border-radius: 12px;
   display: flex;
   flex-direction: column;
   max-height: 100%;
@@ -191,7 +191,7 @@ h1 {
 }
 
 .column-header {
-  padding: 1.25rem;
+  padding: 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -217,7 +217,7 @@ h1 {
 
 .column-title {
   font-weight: 700;
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   color: var(--text-primary);
   cursor: pointer;
   padding: 2px 4px;
@@ -233,10 +233,10 @@ h1 {
   border: 1px solid var(--brand);
   color: white;
   font-weight: 700;
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   padding: 2px 4px;
   border-radius: 4px;
-  width: 180px;
+  width: 140px;
 }
 
 .column-header-right {
@@ -248,18 +248,18 @@ h1 {
 .task-count {
   background-color: var(--bg-accent);
   color: var(--text-secondary);
-  padding: 2px 8px;
+  padding: 2px 6px;
   border-radius: 999px;
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   font-weight: 600;
 }
 
 /* Add Column Ghost */
 .add-column-ghost {
-  min-width: 300px;
-  height: 100px;
+  min-width: 250px;
+  height: 80px;
   border: 2px dashed var(--glass-border);
-  border-radius: 16px;
+  border-radius: 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -279,7 +279,7 @@ h1 {
 
 /* Task List & DND */
 .task-list {
-  padding: 1rem;
+  padding: 0.75rem;
   flex: 1;
   overflow-y: auto;
   min-height: 100px;
@@ -292,9 +292,9 @@ h1 {
 
 .task-card {
   background-color: var(--bg-accent);
-  padding: 1rem;
-  border-radius: 12px;
-  margin-bottom: 1rem;
+  padding: 0.75rem;
+  border-radius: 10px;
+  margin-bottom: 0.75rem;
   cursor: grab;
   border: 1px solid var(--glass-border);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -314,15 +314,15 @@ h1 {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
 }
 
 .task-category {
-  font-size: 0.75rem;
+  font-size: 0.65rem;
   font-weight: 600;
   color: var(--text-secondary);
   background-color: var(--bg-secondary);
-  padding: 2px 8px;
+  padding: 2px 6px;
   border-radius: 4px;
 }
 
@@ -337,9 +337,9 @@ h1 {
 .priority-Baixa { background-color: var(--low); box-shadow: 0 0 8px var(--low); }
 
 .task-title {
-  font-size: 1rem;
+  font-size: 0.85rem;
   font-weight: 600;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
   line-height: 1.4;
 }
 
@@ -355,7 +355,7 @@ h1 {
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  font-size: 0.75rem;
+  font-size: 0.65rem;
   color: var(--text-secondary);
 }
 
@@ -369,7 +369,7 @@ h1 {
   border: none;
   color: var(--text-secondary);
   cursor: pointer;
-  padding: 4px;
+  padding: 2px;
   border-radius: 4px;
   transition: all 0.2s;
 }
