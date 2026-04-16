@@ -33,6 +33,17 @@ interface Category {
   name: string;
   emoji: string;
 }
+const THEMES = [
+  { id: 'nebulosa',   name: 'Nebulosa',       emoji: '🪐', gradient: 'linear-gradient(135deg, #0f172a 0%, #6366f1 100%)' },
+  { id: 'void',       name: 'Void',            emoji: '🟢', gradient: 'linear-gradient(135deg, #020308 0%, #00f5a0 100%)' },
+  { id: 'aurora',     name: 'Aurora Boreal',   emoji: '🌌', gradient: 'linear-gradient(135deg, #030e10 0%, #00d9b4 100%)' },
+  { id: 'solar',      name: 'Erupção Solar',   emoji: '☀️', gradient: 'linear-gradient(135deg, #100700 0%, #f97316 100%)' },
+  { id: 'cosmos',     name: 'Cosmos',          emoji: '🔮', gradient: 'linear-gradient(135deg, #08001c 0%, #e879f9 100%)' },
+  { id: 'lua',        name: 'Lua',             emoji: '🌕', gradient: 'linear-gradient(135deg, #e2e8f0 0%, #6366f1 100%)' },
+  { id: 'marte',      name: 'Marte',           emoji: '🔴', gradient: 'linear-gradient(135deg, #100200 0%, #e53e3e 100%)' },
+  { id: 'black-hole', name: 'Buraco Negro',    emoji: '⚫', gradient: 'linear-gradient(135deg, #000000 0%, #a78bfa 100%)' },
+];
+
 const App = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -48,7 +59,10 @@ const App = () => {
   const [newColumnTitle, setNewColumnTitle] = useState('');
   const [runTour, setRunTour] = useState(false);
   const boardRef = useRef<HTMLDivElement | null>(null);
+  const profileMenuRef = useRef<HTMLDivElement | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [theme, setTheme] = useState<string>(() => localStorage.getItem('gz-theme') || 'nebulosa');
   const [tourSteps] = useState<Step[]>([
     {
       target: '.kanban-board',
@@ -103,6 +117,23 @@ const App = () => {
     const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
     mq.addEventListener('change', handler);
     return () => mq.removeEventListener('change', handler);
+  }, []);
+
+  // Aplica o tema ao <html> e persiste no localStorage
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('gz-theme', theme);
+  }, [theme]);
+
+  // Fecha o menu de perfil ao clicar fora
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(e.target as Node)) {
+        setIsProfileMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
   }, []);
 
   const handleLogin = async () => {
@@ -373,9 +404,35 @@ const App = () => {
         <div className="header-actions">
           {user ? (
             <>
-              <div className="user-profile">
-                <img src={user.photoURL || ''} alt={user.displayName || ''} />
-                <span className="user-name-label">{user.displayName}</span>
+              <div className="profile-menu-wrapper" ref={profileMenuRef}>
+                <div
+                  className="user-profile"
+                  onClick={() => setIsProfileMenuOpen(p => !p)}
+                  title="Personalizar aparência"
+                >
+                  <img src={user.photoURL || ''} alt={user.displayName || ''} />
+                  <span className="user-name-label">{user.displayName}</span>
+                </div>
+                {isProfileMenuOpen && (
+                  <div className="theme-panel">
+                    <div className="theme-panel-header">🎨 Aparência</div>
+                    <div className="theme-grid">
+                      {THEMES.map(t => (
+                        <button
+                          key={t.id}
+                          className={`theme-card ${theme === t.id ? 'active' : ''}`}
+                          onClick={() => { setTheme(t.id); setIsProfileMenuOpen(false); }}
+                        >
+                          <div className="theme-swatch" style={{ background: t.gradient }} />
+                          <span className="theme-name">
+                            {t.emoji} {t.name}
+                            {theme === t.id && <span className="theme-active-indicator" />}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
               <button className="btn-secondary" onClick={handleAddColumn} title="Nova Coluna">
                 <List size={18} /> <span className="btn-label">Nova Coluna</span>
