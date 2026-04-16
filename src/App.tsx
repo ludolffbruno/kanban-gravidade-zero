@@ -48,7 +48,7 @@ const App = () => {
   const [newColumnTitle, setNewColumnTitle] = useState('');
   const [runTour, setRunTour] = useState(false);
   const boardRef = useRef<HTMLDivElement | null>(null);
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const [isMobile, setIsMobile] = useState(false);
   const [tourSteps] = useState<Step[]>([
     {
       target: '.kanban-board',
@@ -95,6 +95,15 @@ const App = () => {
       boardRef.current.scrollLeft = 0;
     }
   }, [columns]);
+
+  // Detecta mobile de forma reativa (funciona após hidratação e em rotação)
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)');
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
 
   const handleLogin = async () => {
     try {
