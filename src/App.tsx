@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Plus, Clock, Edit2, Trash2, List, LogIn, LogOut, GripVertical } from 'lucide-react'
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
 import type { DropResult } from '@hello-pangea/dnd'
+import Joyride, { CallBackProps, STATUS, Step } from 'react-joyride'
 import { auth, googleProvider } from './lib/firebase'
 import { signInWithPopup, signOut, onAuthStateChanged, type User } from 'firebase/auth'
 import * as api from './api'
@@ -44,6 +45,26 @@ const App = () => {
   const [editingColumnId, setEditingColumnId] = useState<number | null>(null);
   const [columnTitleInput, setColumnTitleInput] = useState('');
   const [newColumnTitle, setNewColumnTitle] = useState('');
+  const [runTour, setRunTour] = useState(false);
+  const [tourSteps] = useState<Step[]>([
+    {
+      target: '.kanban-board',
+      content: 'Bem-vindo ao Gravidade Zero! 🚀 Este é o seu painel. Tudo aqui acontece em tempo real.',
+      disableBeacon: true,
+    },
+    {
+      target: '.column',
+      content: 'Estas são as suas colunas. Você pode arrastá-las na horizontal para organizar o seu fluxo de trabalho!',
+    },
+    {
+      target: '.task-card',
+      content: 'Arraste as tarefas entre as colunas conforme elas avançam. Clique para ver e editar os detalhes da tarefa!',
+    },
+    {
+      target: '.btn-new',
+      content: 'Se precisar de mais coisas para fazer (espero que não muitas!), é só clicar aqui.',
+    }
+  ]);
   
   const [formData, setFormData] = useState<Partial<Task>>({
     priority: 'Média',
@@ -103,6 +124,12 @@ const App = () => {
           setTasks(newTasks.data);
           setColumns(newCols.data);
           setCategories(catsRes.data);
+          
+          // Trigger tour for new users
+          const hasSeenTour = localStorage.getItem('hasSeenTour');
+          if (!hasSeenTour) {
+            setTimeout(() => setRunTour(true), 1000);
+          }
           return;
         }
       }
@@ -110,8 +137,24 @@ const App = () => {
       setTasks(tasksRes.data);
       setCategories(catsRes.data);
       setColumns(fetchedColumns);
+
+      // Also check for existing users who haven't seen the tour
+      const hasSeenTour = localStorage.getItem('hasSeenTour');
+      if (!hasSeenTour && fetchedColumns.length > 0) {
+        setTimeout(() => setRunTour(true), 1000);
+      }
     } catch (err) {
       console.error("Error fetching data", err);
+    }
+  };
+
+  const handleJoyrideCallback = (data: CallBackProps) => {
+    const { status } = data;
+    const finishedStatuses: string[] = [STATUS.FINISHED, STATUS.SKIPPED];
+
+    if (finishedStatuses.includes(status)) {
+      setRunTour(false);
+      localStorage.setItem('hasSeenTour', 'true');
     }
   };
 
@@ -252,6 +295,54 @@ const App = () => {
 
   return (
     <div className="app-container">
+      <Joyride
+        callback={handleJoyrideCallback}
+        continuous
+        hideAssistant
+        run={runTour}
+        scrollToFirstStep
+        showProgress
+        showSkipButton
+        steps={tourSteps}
+        styles={{
+          options: {
+            zIndex: 10000,
+            primaryColor: '#6366f1',
+            backgroundColor: '#1e293b',
+            textColor: '#f8fafc',
+            arrowColor: '#1e293b',
+          },
+          buttonNext: {
+            borderRadius: '8px',
+            fontSize: '14px',
+            padding: '8px 16px',
+            fontWeight: 600,
+          },
+          buttonBack: {
+            marginRight: '10px',
+            color: '#94a3b8',
+          },
+          buttonSkip: {
+            color: '#94a3b8',
+          },
+          tooltip: {
+            borderRadius: '16px',
+            padding: '12px',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+          },
+          tooltipContainer: {
+            textAlign: 'left',
+          },
+        }}
+        locale={{
+          back: 'Voltar',
+          close: 'Fechar',
+          last: 'Finalizar',
+          next: 'Próximo',
+          skip: 'Pular Tour',
+        }}
+      />
       <header>
         <div>
           <h1>Gravidade Zero</h1>
