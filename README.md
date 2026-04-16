@@ -1,8 +1,6 @@
 <div align="center">
 
-<img src="./docs/assets/banner.png" alt="Gravidade Zero — Kanban Board" width="100%" />
-
-<br/><br/>
+<br/>
 
 # 🚀 Gravidade Zero
 
