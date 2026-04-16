@@ -1,7 +1,13 @@
-import { db } from "../db";
+import { db } from "../db.js";
+import { verifyToken } from "../utils/auth.js";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  const userId = await verifyToken(req);
+  if (!userId) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
   const { id } = req.query;
 
   if (!id) {
@@ -23,9 +29,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
 
       if (updates.length > 0) {
-        args.push(Number(id)); // add id for WHERE clause
+        args.push(Number(id));
+        args.push(userId);
         await db.execute({
-          sql: `UPDATE tasks SET ${updates.join(", ")} WHERE id = ?`,
+          sql: `UPDATE tasks SET ${updates.join(", ")} WHERE id = ? AND user_id = ?`,
           args: args
         });
       }
@@ -39,8 +46,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === "DELETE") {
     try {
       await db.execute({
-        sql: "DELETE FROM tasks WHERE id = ?",
-        args: [Number(id)]
+        sql: "DELETE FROM tasks WHERE id = ? AND user_id = ?",
+        args: [Number(id), userId]
       });
       return res.status(200).json({ success: true });
     } catch (error) {

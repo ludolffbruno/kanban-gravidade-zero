@@ -1,8 +1,9 @@
-/* Created by: Bruno Ludolff */
 import { useState, useEffect } from 'react'
-import { Plus, Clock, Edit2, Trash2, List } from 'lucide-react'
+import { Plus, Clock, Edit2, Trash2, List, LogIn, LogOut, GripVertical } from 'lucide-react'
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
 import type { DropResult } from '@hello-pangea/dnd'
+import { auth, googleProvider } from './lib/firebase'
+import { signInWithPopup, signOut, onAuthStateChanged, type User } from 'firebase/auth'
 import * as api from './api'
 import './App.css'
 
@@ -30,8 +31,9 @@ interface Category {
   name: string;
   emoji: string;
 }
-
-function App() {
+const App = () => {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [columns, setColumns] = useState<Column[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -48,8 +50,36 @@ function App() {
   });
 
   useEffect(() => {
-    fetchData();
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setLoading(false);
+      if (currentUser) {
+        fetchData();
+      } else {
+        setTasks([]);
+        setColumns([]);
+        setCategories([]);
+      }
+    });
+
+    return () => unsubscribe();
   }, []);
+
+  const handleLogin = async () => {
+    try {
+      await signInWithPopup(auth, googleProvider);
+    } catch (err) {
+      console.error("Login failed", err);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+    } catch (err) {
+      console.error("Logout failed", err);
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -58,9 +88,28 @@ function App() {
         api.getCategories(),
         api.getColumns()
       ]);
+      
+      let fetchedColumns = colsRes.data;
+      
+      // Se não houver colunas, inicializa com exemplos (Primeiro acesso)
+      if (fetchedColumns.length === 0) {
+        const initRes = await api.initUser();
+        if (initRes.data.success || initRes.data.initialized) {
+          // Busca novamente após inicialização
+          const [newTasks, newCols] = await Promise.all([
+            api.getTasks(),
+            api.getColumns()
+          ]);
+          setTasks(newTasks.data);
+          setColumns(newCols.data);
+          setCategories(catsRes.data);
+          return;
+        }
+      }
+
       setTasks(tasksRes.data);
       setCategories(catsRes.data);
-      setColumns(colsRes.data);
+      setColumns(fetchedColumns);
     } catch (err) {
       console.error("Error fetching data", err);
     }
@@ -141,11 +190,31 @@ function App() {
   };
 
   const onDragEnd = async (result: DropResult) => {
-    const { destination, source, draggableId } = result;
+    const { destination, source, draggableId, type } = result;
 
     if (!destination) return;
     if (destination.droppableId === source.droppableId && destination.index === source.index) return;
 
+    // Lógica para Colunas
+    if (type === 'column') {
+      const newColumns = Array.from(columns);
+      const [movedColumn] = newColumns.splice(source.index, 1);
+      newColumns.splice(destination.index, 0, movedColumn);
+
+      // Atualiza localmente com as novas posições
+      const finalColumns = newColumns.map((col, idx) => ({ ...col, position: idx }));
+      setColumns(finalColumns);
+
+      try {
+        await api.reorderColumns(finalColumns.map(c => ({ id: c.id, position: c.position })));
+      } catch (err) {
+        console.error("Error reordering columns", err);
+        fetchData();
+      }
+      return;
+    }
+
+    // Lógica para Tarefas
     const taskId = parseInt(draggableId);
     const newColumnId = parseInt(destination.droppableId);
     const newPosition = destination.index;
@@ -164,10 +233,10 @@ function App() {
         column_id: newColumnId,
         position: newPosition 
       });
-      fetchData(); // Sincroniza posições de todos
+      fetchData(); 
     } catch (err) {
       console.error("Error moving task", err);
-      fetchData(); // Reverte em caso de erro
+      fetchData(); 
     }
   };
 
@@ -189,102 +258,185 @@ function App() {
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Gestão de tarefas em órbita 🚀</p>
         </div>
         <div className="header-actions">
-          <button className="btn-secondary" onClick={handleAddColumn}>
-            <List size={18} /> Nova Coluna
-          </button>
-          <button className="btn-new" onClick={() => { setFormData({ priority: 'Média' }); setIsModalOpen(true); }}>
-            <Plus size={20} /> Nova Tarefa
-          </button>
+          {user ? (
+            <>
+              <div className="user-profile">
+                <img src={user.photoURL || ''} alt={user.displayName || ''} />
+                <span>{user.displayName}</span>
+              </div>
+              <button className="btn-secondary" onClick={handleAddColumn}>
+                <List size={18} /> Nova Coluna
+              </button>
+              <button className="btn-new" onClick={() => { setFormData({ priority: 'Média' }); setIsModalOpen(true); }}>
+                <Plus size={20} /> Nova Tarefa
+              </button>
+              <button className="btn-logout" onClick={handleLogout} title="Sair">
+                <LogOut size={18} />
+              </button>
+            </>
+          ) : (
+            <button className="btn-login" onClick={handleLogin}>
+              <LogIn size={18} /> Entrar com Google
+            </button>
+          )}
         </div>
       </header>
 
-      <DragDropContext onDragEnd={onDragEnd}>
-        <div className="kanban-board">
-          {columns.map(column => (
-            <div key={column.id} className="column">
-              <div className="column-header">
-                {editingColumnId === column.id ? (
-                  <input
-                    autoFocus
-                    className="column-title-edit"
-                    value={columnTitleInput}
-                    onChange={e => setColumnTitleInput(e.target.value)}
-                    onBlur={() => handleRenameColumn(column.id)}
-                    onKeyDown={e => e.key === 'Enter' && handleRenameColumn(column.id)}
-                  />
-                ) : (
-                  <span 
-                    className="column-title" 
-                    onClick={() => { setEditingColumnId(column.id); setColumnTitleInput(column.title); }}
-                  >
-                    {column.title}
-                  </span>
-                )}
-                <div className="column-header-right">
-                  <span className="task-count">{tasks.filter(t => t.column_id === column.id).length}</span>
-                  <button className="icon-btn-danger" onClick={() => handleDeleteColumn(column.id)}>
-                    <Trash2 size={14} />
-                  </button>
-                </div>
+      {loading ? (
+        <div className="loading-container">
+          <div className="orbit-loader">
+            <div className="planet"></div>
+            <div className="satellite"></div>
+          </div>
+          <p>Sincronizando com a estação espacial...</p>
+        </div>
+      ) : !user ? (
+        <div className="landing-page">
+          <div className="landing-content">
+            <div className="badge">Nova Era na Gestão de Tarefas</div>
+            <h2>Sua Produtividade em <span className="gradient-text">Gravidade Zero</span></h2>
+            <p>
+              Organize seus projetos com a leveza do espaço. 
+              Um Kanban minimalista, poderoso e pensado para quem busca foco total.
+            </p>
+            <div className="landing-features">
+              <div className="feature">
+                <h3>Isolamento Total</h3>
+                <p>Seus dados são só seus. Kanban 100% pessoal.</p>
               </div>
+              <div className="feature">
+                <h3>Drag & Drop Fluido</h3>
+                <p>Mova colunas e tarefas com suavidade orbital.</p>
+              </div>
+            </div>
+            <button className="btn-login-hero" onClick={handleLogin}>
+              <LogIn size={20} /> Entrar com Google
+            </button>
+            <span className="trust-badge">Acesso seguro via Google Auth</span>
+          </div>
+          <div className="landing-visual">
+             {/* Preview simplificado ou gráfico */}
+             <div className="preview-card">
+                <div className="preview-header"></div>
+                <div className="preview-line"></div>
+                <div className="preview-line short"></div>
+             </div>
+             <div className="preview-card float">
+                <div className="preview-header secondary"></div>
+                <div className="preview-line"></div>
+             </div>
+          </div>
+        </div>
+      ) : (
+        <DragDropContext onDragEnd={onDragEnd}>
+          <Droppable droppableId="board" type="column" direction="horizontal">
+            {(provided) => (
+              <div 
+                className="kanban-board"
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+              >
+                {columns.sort((a, b) => a.position - b.position).map((column, index) => (
+                  <Draggable key={column.id} draggableId={column.id.toString()} index={index}>
+                    {(provided, snapshot) => (
+                      <div 
+                        key={column.id} 
+                        className={`column ${snapshot.isDragging ? 'is-dragging-column' : ''}`}
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                      >
+                        <div className="column-header" {...provided.dragHandleProps}>
+                          <div className="column-title-wrapper">
+                            <GripVertical size={14} className="drag-handle-icon" />
+                            {editingColumnId === column.id ? (
+                              <input
+                                autoFocus
+                                className="column-title-edit"
+                                value={columnTitleInput}
+                                onChange={e => setColumnTitleInput(e.target.value)}
+                                onBlur={() => handleRenameColumn(column.id)}
+                                onKeyDown={e => e.key === 'Enter' && handleRenameColumn(column.id)}
+                              />
+                            ) : (
+                              <span 
+                                className="column-title" 
+                                onClick={() => { setEditingColumnId(column.id); setColumnTitleInput(column.title); }}
+                              >
+                                {column.title}
+                              </span>
+                            )}
+                          </div>
+                          <div className="column-header-right">
+                            <span className="task-count">{tasks.filter(t => t.column_id === column.id).length}</span>
+                            <button className="icon-btn-danger" onClick={() => handleDeleteColumn(column.id)}>
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </div>
 
-              <Droppable droppableId={column.id.toString()}>
-                {(provided, snapshot) => (
-                  <div 
-                    className={`task-list ${snapshot.isDraggingOver ? 'dragging-over' : ''}`}
-                    {...provided.droppableProps}
-                    ref={provided.innerRef}
-                  >
-                    {tasks
-                      .filter(t => t.column_id === column.id)
-                      .sort((a, b) => a.position - b.position)
-                      .map((task, index) => (
-                        <Draggable key={task.id} draggableId={task.id.toString()} index={index}>
+                        <Droppable droppableId={column.id.toString()} type="task">
                           {(provided, snapshot) => (
                             <div 
-                              className={`task-card ${snapshot.isDragging ? 'is-dragging' : ''}`}
+                              className={`task-list ${snapshot.isDraggingOver ? 'dragging-over' : ''}`}
+                              {...provided.droppableProps}
                               ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                              onClick={() => openDetail(task)}
                             >
-                              <div className="task-card-header">
-                                <span className="task-category">
-                                  {task.category_emoji} {task.category_name}
-                                </span>
-                                <div className={`priority-dot priority-${task.priority}`} />
-                              </div>
-                              <h3 className="task-title">{task.title}</h3>
-                              <div className="task-footer">
-                                <div className="task-date">
-                                  <Clock size={12} />
-                                  {task.due_date ? new Date(task.due_date).toLocaleDateString('pt-BR') : 'Sem data'}
-                                </div>
-                                <div className="task-actions">
-                                  <button className="icon-btn" onClick={(e) => { e.stopPropagation(); openEdit(task); }}>
-                                    <Edit2 size={13} />
-                                  </button>
-                                  <button className="icon-btn delete-btn" onClick={(e) => { e.stopPropagation(); handleDelete(task.id); }}>
-                                    <Trash2 size={13} />
-                                  </button>
-                                </div>
-                              </div>
+                              {tasks
+                                .filter(t => t.column_id === column.id)
+                                .sort((a, b) => a.position - b.position)
+                                .map((task, index) => (
+                                  <Draggable key={task.id} draggableId={task.id.toString()} index={index}>
+                                    {(provided, snapshot) => (
+                                      <div 
+                                        className={`task-card ${snapshot.isDragging ? 'is-dragging' : ''}`}
+                                        ref={provided.innerRef}
+                                        {...provided.draggableProps}
+                                        {...provided.dragHandleProps}
+                                        onClick={() => openDetail(task)}
+                                      >
+                                        <div className="task-card-header">
+                                          <span className="task-category">
+                                            {task.category_emoji} {task.category_name}
+                                          </span>
+                                          <div className={`priority-dot priority-${task.priority}`} />
+                                        </div>
+                                        <h3 className="task-title">{task.title}</h3>
+                                        <div className="task-footer">
+                                          <div className="task-date">
+                                            <Clock size={12} />
+                                            {task.due_date ? new Date(task.due_date).toLocaleDateString('pt-BR') : 'Sem data'}
+                                          </div>
+                                          <div className="task-actions">
+                                            <button className="icon-btn" onClick={(e) => { e.stopPropagation(); openEdit(task); }}>
+                                              <Edit2 size={13} />
+                                            </button>
+                                            <button className="icon-btn delete-btn" onClick={(e) => { e.stopPropagation(); handleDelete(task.id); }}>
+                                              <Trash2 size={13} />
+                                            </button>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </Draggable>
+                                ))}
+                              {provided.placeholder}
                             </div>
                           )}
-                        </Draggable>
-                      ))}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            </div>
-          ))}
-          <button className="add-column-ghost" onClick={handleAddColumn}>
-             <Plus size={24} />
-             <span>Adicionar Coluna</span>
-          </button>
-        </div>
-      </DragDropContext>
+                        </Droppable>
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
+                <button className="add-column-ghost" onClick={handleAddColumn}>
+                  <Plus size={24} />
+                  <span>Adicionar Coluna</span>
+                </button>
+              </div>
+            )}
+          </Droppable>
+        </DragDropContext>
+      )}
 
       {/* Modal Criar/Editar */}
       {isModalOpen && (
