@@ -725,13 +725,24 @@ h1 {
 
 /* ── Mobile ───────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
+  html, body {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  #root {
+    height: 100%;
+  }
+
   .app-container {
-    padding: 0.6rem 0.6rem 0;
+    padding: 0.7rem 0.7rem 0;
+    /* Altura total da viewport, com suporte a safe-area em iOS */
     height: 100dvh;
-    height: 100svh; /* safe fallback */
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    /* Essencial: evita que filhos flex "estourem" o container */
+    min-height: 0;
   }
 
   /* ── Header compacto horizontal ── */
@@ -741,8 +752,8 @@ h1 {
     align-items: center;
     flex-wrap: nowrap;
     gap: 0.4rem;
-    margin-bottom: 0.6rem;
-    padding: 0 0.2rem;
+    margin-bottom: 0.5rem;
+    padding: 0;
     flex-shrink: 0;
   }
 
@@ -751,11 +762,14 @@ h1 {
     align-items: center;
     gap: 0.4rem;
     min-width: 0;
+    overflow: hidden;
   }
 
   h1 {
     font-size: 1.1rem;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   header p {
@@ -792,45 +806,61 @@ h1 {
     min-width: unset;
   }
 
-  /* ── Board + colunas ── */
+  /* ── Board ── */
   .kanban-board {
+    /* Ocupa todo o espaço vertical restante */
     flex: 1 1 0;
+    min-height: 0;               /* ← chave: permite shrink dentro do flex column */
+    align-items: stretch;        /* ← colunas esticam 100% da altura do board */
+
     display: flex;
     flex-wrap: nowrap;
     overflow-x: auto;
     overflow-y: hidden;
-    gap: 0.6rem;
-    padding: 0 0.6rem 0.5rem;
+    gap: 0.75rem;
+    /* padding lateral = metade do gap, para o primeiro card ficar centrado */
+    padding: 0 0.7rem 0.6rem;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;       /* Firefox */
-    -ms-overflow-style: none;    /* IE/Edge */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
 
   .kanban-board::-webkit-scrollbar {
     display: none;
   }
 
+  /* ── Coluna ── */
   .column {
-    width: 88vw;
-    min-width: 88vw;
-    max-width: 88vw;
+    /* Largura: viewport menos o padding bilateral do board (2 × 0.7rem = 1.4rem) */
+    width: calc(100vw - 1.4rem);
+    min-width: calc(100vw - 1.4rem);
+    max-width: calc(100vw - 1.4rem);
     flex-shrink: 0;
     scroll-snap-align: start;
-    /* garante que a coluna não ultrapasse a viewport vertical */
-    max-height: 100%;
+
+    /* Usa altura total do board (graças ao align-items: stretch acima) */
+    height: 100%;
     display: flex;
     flex-direction: column;
+
+    /* Remove max-height que colapsa a coluna */
+    max-height: unset;
   }
 
+  /* ── Task list scrollável dentro da coluna ── */
   .task-list {
     flex: 1 1 0;
+    min-height: 0;
     overflow-y: auto;
-    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.5rem;
   }
 
   .add-column-ghost {
-    min-width: 150px;
+    width: 140px;
+    min-width: 140px;
+    align-self: flex-start;
     scroll-snap-align: start;
   }
 
@@ -840,11 +870,6 @@ h1 {
     width: 96%;
     max-height: 88dvh;
     overflow-y: auto;
-  }
-
-  /* ── Prevenir scroll horizontal na página ── */
-  body {
-    overflow-x: hidden;
   }
 }
 
